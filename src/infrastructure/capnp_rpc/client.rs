@@ -73,7 +73,6 @@ pub trait RpcResponse {
     type OutputJson: Serialize + Debug + Send + 'static;
     fn new(rpc_system: RpcSystem<rpc_twoparty_capnp::Side>) -> Self;
     fn get_promise(self, data: Self::InputData) -> Promise<Response<Self::CapNpResult>, Error>;
-    // get raw reponse
     fn extract_response(response: Response<Self::CapNpResult>) -> capnp::Result<Self::OutputJson>;
 }
 
