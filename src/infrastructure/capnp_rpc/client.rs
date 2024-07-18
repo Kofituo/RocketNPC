@@ -44,10 +44,7 @@ impl<Client: RpcResponse> RpcClient<Client> {
                     Default::default(),
                 ));
                 let rpc_system = RpcSystem::new(rpc_network, None);
-                let reply = Client::new(rpc_system)
-                    .get_promise(message)
-                    .await
-                    .inspect_err(|e| println!("inspec r {}", e))?;
+                let reply = Client::new(rpc_system).get_promise(message).await?;
                 let reply_message = Client::extract_response(reply)?;
                 println!("received: {}", reply_message);
                 //send the message to the receiver
