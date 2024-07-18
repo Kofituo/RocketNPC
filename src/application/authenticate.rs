@@ -60,14 +60,14 @@ impl RpcResponse for ocs365_capnp::authenticate::Client {
     fn get_promise(
         self,
         data: Self::InputData,
-    ) -> Promise<Response<authenticate_results::Owned>, Error> {
+    ) -> Promise<Response<Self::CapNpResult>, Error> {
         let mut request = self.authenticate_request();
         let mut builder = request.get().init_auth();
         builder.set_user_name(&data.userName);
         builder.set_user_password(&data.userPassword);
         request.send().promise
     }
-    fn extract_response(response: Response<authenticate_results::Owned>) -> capnp::Result<String> {
+    fn extract_response(response: Response<Self::CapNpResult>) -> capnp::Result<String> {
         response
             .get()?
             .get_result()?
