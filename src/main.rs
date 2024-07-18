@@ -14,6 +14,8 @@ use application::*;
 
 mod infrastructure;
 
+use crate::hello_world_capnp::hello_world;
+use crate::hello_world_capnp::hello_world::say_hello_results;
 use serde_json::Value;
 use urlencoding::decode;
 
@@ -30,6 +32,10 @@ pub enum RequestError {
 
 pub mod hello_world_capnp {
     include!(concat!(env!("OUT_DIR"), "/src/hello_world_capnp.rs"));
+}
+
+pub mod ocs365_capnp {
+    include!(concat!(env!("OUT_DIR"), "/src/ocs365_capnp.rs"));
 }
 
 #[rocket::async_trait]
@@ -170,7 +176,7 @@ async fn invoke(
                 ));
             }
             let userlogin: model::authenticate::Login = result_ser.unwrap();
-            let authenticate_result = application::authenticate::authenticate(userlogin);
+            let authenticate_result = application::authenticate::authenticate(userlogin).await;
             if let Err(e) = authenticate_result {
                 return Err(error_handler::handle_error_struct(
                     e,
@@ -280,9 +286,12 @@ async fn invoke(
         }
 
         "TEST" => {
-            let response_result =
-                infrastructure::capnp_rpc::client::run_client("Hello World!!".to_string()).await;
+            let response_result = infrastructure::capnp_rpc::client::run_client::<
+                hello_world::Client,
+            >("Hello World!!".to_string())
+            .await;
 
+            println!("print resp {:?}", response_result);
             return Err(error_handler::handle_error(
                 String::from("entro"),
                 String::from("Entro"),
@@ -336,7 +345,6 @@ fn validate_token(
 #[rocket::main]
 async fn main() {
     log4rs::init_file("./src/log4rs.yaml", Default::default()).unwrap();
-
     rocket::build()
         .mount("/ExternalAPI", routes![invoke])
         .mount("/Admin", routes![shutdown])
